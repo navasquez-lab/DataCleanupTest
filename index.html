@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How clean is your HubSpot data? — HUG Quiz</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem}
+  .card{background:#fff;border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,.08);width:100%;max-width:580px;padding:2rem 2rem 1.75rem;margin:0 auto}
+  .brand{display:flex;align-items:center;gap:8px;margin-bottom:1.75rem}
+  .brand-dot{width:10px;height:10px;border-radius:50%;background:#ff5c35}
+  .brand-label{font-size:12px;font-weight:600;color:#ff5c35;letter-spacing:.06em;text-transform:uppercase}
+  .progress-wrap{margin-bottom:1.5rem}
+  .progress-track{height:4px;background:#f0efed;border-radius:2px;overflow:hidden}
+  .progress-fill{height:100%;background:#ff5c35;border-radius:2px;transition:width .4s ease}
+  .q-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem}
+  .q-counter{font-size:12px;font-weight:600;color:#999;letter-spacing:.04em;text-transform:uppercase}
+  .q-text{font-size:18px;font-weight:600;color:#1a1a18;line-height:1.4;margin-bottom:1.25rem}
+  .option{display:flex;align-items:flex-start;gap:10px;padding:.8rem 1rem;border:1.5px solid #e8e7e4;border-radius:10px;margin-bottom:.55rem;cursor:pointer;transition:border-color .15s,background .15s}
+  .option:hover{border-color:#ccc;background:#fafaf9}
+  .option.selected{border-color:#ff5c35;background:#fff8f6}
+  .option .dot{width:18px;height:18px;border-radius:50%;border:1.5px solid #ccc;flex-shrink:0;margin-top:1px;transition:all .15s;display:flex;align-items:center;justify-content:center}
+  .option.selected .dot{background:#ff5c35;border-color:#ff5c35}
+  .option.selected .dot::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff}
+  .option-text{font-size:14px;color:#333;line-height:1.45}
+  .err{font-size:13px;color:#d0341f;margin-top:.5rem;min-height:18px}
+  .nav{display:flex;justify-content:flex-end;margin-top:1.25rem}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:.6rem 1.4rem;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;border:none}
+  .btn-primary{background:#ff5c35;color:#fff}
+  .btn-primary:hover{background:#e0472a}
+  .btn-ghost{background:transparent;color:#666;border:1.5px solid #e0deda}
+  .btn-ghost:hover{background:#f5f5f3;color:#333}
+
+  /* Result */
+  .result-header{text-align:center;padding:1rem 0 1.5rem}
+  .score-ring{width:84px;height:84px;border-radius:50%;border:3px solid #ff5c35;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:22px;font-weight:700;color:#ff5c35}
+  .result-badge{display:inline-block;font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:.75rem;letter-spacing:.04em;text-transform:uppercase}
+  .badge-ok{background:#e6f7ee;color:#1a7a47}
+  .badge-warn{background:#fff4e0;color:#9a6200}
+  .badge-bad{background:#feeceb;color:#c0341d}
+  .result-title{font-size:20px;font-weight:700;color:#1a1a18;margin-bottom:.5rem}
+  .result-sub{font-size:14px;color:#666;line-height:1.6;max-width:440px;margin:0 auto 1.5rem}
+  .recs-label{font-size:11px;font-weight:700;color:#aaa;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.75rem}
+  .rec-card{background:#fafaf9;border:1px solid #eeece8;border-radius:10px;padding:.9rem 1rem;margin-bottom:.6rem}
+  .rec-head{display:flex;align-items:center;gap:8px;margin-bottom:.35rem}
+  .rec-icon{width:22px;height:22px;border-radius:6px;background:#ff5c35;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .rec-icon svg{width:12px;height:12px;fill:#fff}
+  .rec-title{font-size:13px;font-weight:700;color:#1a1a18}
+  .rec-body{font-size:13px;color:#666;line-height:1.5}
+  .restart-row{text-align:center;margin-top:1.25rem}
+  .footer{text-align:center;margin-top:1.5rem;font-size:12px;color:#bbb}
+  .footer span{color:#ff5c35;font-weight:600}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">
+    <div class="brand-dot"></div>
+    <div class="brand-label">HUG Data Cleanup · Quick Quiz</div>
+  </div>
+
+  <div id="quiz-screen">
+    <div class="progress-wrap">
+      <div class="q-meta">
+        <span class="q-counter" id="q-counter">Question 1 of 5</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+    </div>
+    <div class="q-text" id="q-text"></div>
+    <div id="options"></div>
+    <div class="err" id="err"></div>
+    <div class="nav"><button class="btn btn-primary" id="next-btn" onclick="next()">Next →</button></div>
+  </div>
+
+  <div id="result-screen" style="display:none"></div>
+  <div class="footer">Presented by <span>HubSpot User Group</span></div>
+</div>
+
+<script>
+const questions=[
+  {q:"How often do you audit your contact database for duplicates?",opts:["Never or rarely","Once a year","Quarterly","We have automated deduplication"],scores:[3,2,1,0]},
+  {q:"What percentage of your contacts have incomplete data (missing email, job title, company)?",opts:["More than 50%","25–50%","10–25%","Less than 10%"],scores:[3,2,1,0]},
+  {q:"How do contacts enter your CRM?",opts:["Manually, by different team members with no standard","Mostly manual, with some guidelines","Forms with partial validation","Automated workflows with required fields and validation"],scores:[3,2,1,0]},
+  {q:"When did you last review your custom properties and delete unused ones?",opts:["We've never done that","A long time ago — there's a lot of clutter","We do it annually","We review and clean them regularly"],scores:[3,2,1,0]},
+  {q:"Do you have clear ownership of data quality in your team?",opts:["No one is responsible","It's shared but no one really leads it","One person manages it ad hoc","We have defined roles and documented processes"],scores:[3,2,1,0]}
+];
+
+const recs=[
+  {title:"Deduplicate with HubSpot's duplicate manager",body:"HubSpot surfaces likely duplicates automatically. For bulk cleanup, Operations Hub's data quality features can merge records at scale.",trigger:s=>s>=40},
+  {title:"Enrich data gaps with Breeze Intelligence",body:"Breeze Intelligence fills missing job titles, industries, company size, and more — automatically, without manual effort.",trigger:s=>s>=10},
+  {title:"Enforce quality at entry",body:"Set required fields on forms and record creation views. Pair with property validation rules in Operations Hub so bad data never enters the CRM.",trigger:s=>s>=30},
+  {title:"Audit your property library",body:"Go to Settings → Properties to spot unused or duplicate properties. A lean property set makes every report and workflow easier to build.",trigger:s=>s>=10},
+  {title:"Build a data governance playbook",body:"Assign a data steward, define naming conventions, and schedule quarterly audits. HubSpot's User Roles and Teams help control who can create properties or import records.",trigger:s=>s>=30}
+];
+
+let current=0,answers=[],selected=null;
+
+function render(){
+  const q=questions[current];
+  document.getElementById('q-counter').textContent=`Question ${current+1} of ${questions.length}`;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('err').textContent='';
+  document.getElementById('prog').style.width=`${(current/questions.length)*100}%`;
+  selected=null;
+  const c=document.getElementById('options');
+  c.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const d=document.createElement('div');
+    d.className='option';
+    d.innerHTML=`<div class="dot"></div><span class="option-text">${o}</span>`;
+    d.onclick=()=>sel(i);
+    c.appendChild(d);
+  });
+  document.getElementById('next-btn').textContent=current===questions.length-1?'See my results →':'Next →';
+}
+
+function sel(i){
+  selected=i;
+  document.querySelectorAll('.option').forEach((el,idx)=>el.classList.toggle('selected',idx===i));
+  document.getElementById('err').textContent='';
+}
+
+function next(){
+  if(selected===null){document.getElementById('err').textContent='Pick an answer to continue.';return;}
+  answers.push(selected);
+  if(current<questions.length-1){current++;render();}
+  else showResult();
+}
+
+function showResult(){
+  document.getElementById('prog').style.width='100%';
+  let total=0;
+  answers.forEach((a,i)=>total+=questions[i].scores[a]);
+  const max=questions.length*3;
+  const pct=Math.round((total/max)*100);
+  let title,sub,badgeLabel,badgeClass;
+  if(pct<=25){title="Your data is in great shape!";sub="You already have strong practices in place. Focus on maintaining them and exploring more advanced automation in Operations Hub.";badgeLabel="Clean";badgeClass="badge-ok";}
+  else if(pct<=55){title="Some cleanup needed";sub="You're doing well in parts but there are gaps to close. A few targeted tools and a light governance plan will take you far.";badgeLabel="Moderate";badgeClass="badge-warn";}
+  else{title="Time for a data rescue mission";sub="Don't worry — HubSpot has the tools you need. Start with a deduplication run and enforcing required fields, then build from there.";badgeLabel="Needs work";badgeClass="badge-bad";}
+
+  const active=recs.filter(r=>r.trigger(pct));
+  const iconSvg=`<svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.75 10.5h-1.5v-5h1.5v5zm0-6.5h-1.5V3.5h1.5V5z"/></svg>`;
+  let html=`<div class="result-header">
+    <div class="score-ring">${pct}%</div>
+    <div><span class="result-badge ${badgeClass}">${badgeLabel}</span></div>
+    <div class="result-title">${title}</div>
+    <div class="result-sub">${sub}</div>
+  </div>
+  <div class="recs-label">Recommended HubSpot tools for you</div>`;
+  active.forEach(r=>{
+    html+=`<div class="rec-card"><div class="rec-head"><div class="rec-icon">${iconSvg}</div><div class="rec-title">${r.title}</div></div><div class="rec-body">${r.body}</div></div>`;
+  });
+  html+=`<div class="restart-row"><button class="btn btn-ghost" onclick="restart()">↺ Retake the quiz</button></div>`;
+
+  document.getElementById('quiz-screen').style.display='none';
+  const rs=document.getElementById('result-screen');
+  rs.innerHTML=html;
+  rs.style.display='block';
+}
+
+function restart(){
+  current=0;answers=[];selected=null;
+  document.getElementById('result-screen').style.display='none';
+  document.getElementById('quiz-screen').style.display='block';
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
