@@ -1,2 +1,16 @@
-# Data Cleanup Test
-Resources &amp; Tools  A collection of resources for HubSpot User Group sessions on data quality and CRM cleanup. Includes interactive quizzes, guides, and references to HubSpot tools like Duplicate Management, Breeze Intelligence, and Operations Hub to help teams assess and improve their data health.
+# HUG Data Cleanup
+
+Resources for the HubSpot User Group session on data quality and CRM cleanup.
+
+## What's inside
+- **index.html** — Interactive quiz to help you assess how clean your HubSpot data is, with personalized tool recommendations at the end.
+
+## Tools covered
+- Duplicate Management
+- Breeze Intelligence
+- Operations Hub
+- Property Auditing
+- Data Governance best practices
+
+## How to take the quiz
+👉 https://navasquez-lab.github.io/datacleanup/
